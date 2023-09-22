@@ -36,7 +36,7 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
-	-- { "Bekaboo/dropbar.nvim" , },
+	-- { "Bekaboo/dropbar.nvim", },
 	{
 		"utilyre/barbecue.nvim",
 		name = "barbecue",
@@ -60,7 +60,7 @@ require("lazy").setup({
 		"nvim-lualine/lualine.nvim",
 		requires = { "nvim-tree/nvim-web-devicons", opt = true },
 		config = function()
-			require('lualine').setup()
+			require("lualine").setup()
 		end,
 	},
 	---文件树----------------------------------------------------------------------------------------------------------------------------------------
@@ -426,9 +426,6 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"preservim/tagbar",
-	},
-	{
 		"windwp/nvim-autopairs",
 		event = "InsertEnter",
 		opts = {}, -- this is equalent to setup({}) function
@@ -438,6 +435,23 @@ require("lazy").setup({
 		config = function()
 			require("symbols-outline").setup()
 		end,
+	},
+	{
+		"Dhanus3133/LeetBuddy.nvim",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-telescope/telescope.nvim",
+		},
+		config = function()
+			require("leetbuddy").setup({})
+		end,
+		keys = {
+			{ "<leader>lq", "<cmd>LBQuestions<cr>", desc = "List Questions" },
+			{ "<leader>ll", "<cmd>LBQuestion<cr>", desc = "View Question" },
+			{ "<leader>lr", "<cmd>LBReset<cr>", desc = "Reset Code" },
+			{ "<leader>lt", "<cmd>LBTest<cr>", desc = "Run Code" },
+			{ "<leader>ls", "<cmd>LBSubmit<cr>", desc = "Submit Code" },
+		},
 	},
 })
 ---按键映射--------------------------------------------------------------------------------------------------------------------------------------
@@ -504,9 +518,12 @@ require("mason-lspconfig").setup({
 		"lua_ls",
 		"bashls",
 		-- "clangd",
-		-- "html",
+		"html",
 		"pyright",
 		"vimls",
+		"cssls",
+		"biome",
+		-- "sqlls",
 	},
 })
 -- If you want insert `(` after select function or method item
