@@ -1,7 +1,6 @@
-----自定义---------------------------------------------------------------------------------------------------------------------------------------
 vim.o.incsearch = true
+vim.g.indentLine_fileTypeExclude = { "dashboard" }
 vim.opt.clipboard = "unnamedplus"
-vim.g.indentLine_fileTypeExclude = { "dashboard", "markdown", "veil", "txt", "pdf" }
 vim.wo.colorcolumn = "146"
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
@@ -36,18 +35,53 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
-	-- { "Bekaboo/dropbar.nvim", },
+	{
+		"VidocqH/lsp-lens.nvim",
+		config = function()
+			require("lsp-lens").setup({
+				enable = true,
+				LspLens = { link = "Comment" },
+				include_declaration = false, -- Reference include declaration
+				ignore_filetype = {
+					"prisma",
+				},
+				sections = {
+					definition = function(count)
+						return "函数: " .. count
+					end,
+					references = function(count)
+						return "References: " .. count
+					end,
+					implements = function(count)
+						return "Implements: " .. count
+					end,
+				},
+			})
+		end,
+	},
+	{
+		"nvimdev/lspsaga.nvim",
+		config = function()
+			require("lspsaga").setup({})
+		end,
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter",
+			"nvim-tree/nvim-web-devicons",
+		},
+	},
+	{
+		"folke/trouble.nvim",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+	},
 	{
 		"utilyre/barbecue.nvim",
 		name = "barbecue",
 		version = "*",
 		dependencies = { "SmiteshP/nvim-navic", "nvim-tree/nvim-web-devicons" },
-		opts = {},
 	},
 	{
 		"xiyaowong/transparent.nvim",
 	},
-	---顶部文件标签----------------------------------------------------------------------------------------------------------------------------------
 	{
 		"akinsho/bufferline.nvim",
 		version = "*",
@@ -63,7 +97,6 @@ require("lazy").setup({
 			require("lualine").setup()
 		end,
 	},
-	---文件树----------------------------------------------------------------------------------------------------------------------------------------
 	{
 		"nvim-tree/nvim-tree.lua",
 		version = "*",
@@ -82,15 +115,16 @@ require("lazy").setup({
 		config = function()
 			vim.o.background = "dark"
 			vim.cmd.colorscheme("gruvbox")
-			-- transparent_mode = true
 		end,
+	},
+	{
+		"lunarvim/synthwave84.nvim",
 	},
 	{
 		"catppuccin/nvim",
 		name = "catppuccin",
 		priority = 1000,
 		opts = {
-			-- transparent_background = true,
 			integrations = {
 				telescope = true,
 				harpoon = true,
@@ -124,7 +158,6 @@ require("lazy").setup({
 			})
 		end,
 	},
-	---nvim 格式化-----------------------------------------------------------------------------------------------------------------------------------
 	{
 		"mhartington/formatter.nvim",
 	},
@@ -201,28 +234,7 @@ require("lazy").setup({
 		"lukas-reineke/indent-blankline.nvim",
 		main = "ibl",
 		config = function()
-			local highlight = {
-				"RainbowRed",
-				"RainbowYellow",
-				"RainbowBlue",
-				"RainbowOrange",
-				"RainbowGreen",
-				"RainbowViolet",
-				"RainbowCyan",
-			}
-
-			local hooks = require("ibl.hooks")
-			hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
-				vim.api.nvim_set_hl(0, "RainbowRed", { fg = "#E06C75" })
-				vim.api.nvim_set_hl(0, "RainbowYellow", { fg = "#E5C07B" })
-				vim.api.nvim_set_hl(0, "RainbowBlue", { fg = "#61AFEF" })
-				vim.api.nvim_set_hl(0, "RainbowOrange", { fg = "#D19A66" })
-				vim.api.nvim_set_hl(0, "RainbowGreen", { fg = "#98C379" })
-				vim.api.nvim_set_hl(0, "RainbowViolet", { fg = "#C678DD" })
-				vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
-			end)
-
-			require("ibl").setup({ indent = { highlight = highlight } })
+			require("ibl").setup()
 		end,
 	},
 	{
@@ -308,10 +320,6 @@ require("lazy").setup({
 		config = function()
 			require("dapui").setup()
 		end,
-	},
-	{
-		"RRethy/vim-illuminate",
-		config = function() end,
 	},
 	{
 		"folke/flash.nvim",
@@ -457,11 +465,13 @@ require("lazy").setup({
 vim.api.nvim_set_keymap("i", "jk", "<esc>", { silent = true, noremap = true })
 
 -- lspsaga
---[[ vim.api.nvim_set_keymap("n", "gr", "<cmd>lua require('lspsaga.rename').rename()<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "gr", "<cmd>lua require('lspsaga.rename').rename()<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "ac", "<cmd>Lspsaga code_action<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "hd", "<cmd>Lspsaga hover_doc<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "dj", "<cmd>Lspsaga hover_doc<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "sl", "<cmd>Lspsaga show_line_diagnostics<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "lf", "<cmd>Lspsaga lsp_finder<CR>" , { noremap = true, silent = true }) ]]
+vim.api.nvim_set_keymap("n", "lf", "<cmd>Lspsaga lsp_finder<CR>", { noremap = true, silent = true })
+
+vim.api.nvim_set_keymap("n", "<C-y>", "<cmd>lua vim.lsp.buf.declaration()<CR>", { silent = true, noremap = true })
 
 -- 打开大纲
 vim.api.nvim_set_keymap("n", "<C-k>", "<cmd>SymbolsOutline<CR>", { silent = true, noremap = true })
