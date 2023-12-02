@@ -1,4 +1,5 @@
 vim.o.incsearch = true
+vim.o.undofile = true
 vim.g.indentLine_fileTypeExclude = { "dashboard" }
 vim.opt.clipboard = "unnamedplus"
 vim.wo.colorcolumn = "146"
@@ -36,6 +37,10 @@ end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
 	{
+		"kevinhwang91/nvim-ufo",
+		requires = "kevinhwang91/promise-async",
+	},
+	{
 		"VidocqH/lsp-lens.nvim",
 		config = function()
 			require("lsp-lens").setup({
@@ -50,10 +55,13 @@ require("lazy").setup({
 						return "函数: " .. count
 					end,
 					references = function(count)
-						return "References: " .. count
+						return "传参: " .. count -- References
 					end,
 					implements = function(count)
-						return "Implements: " .. count
+						return "实施: " .. count -- Implements
+					end,
+					git_authors = function(latest_author, count)
+						return " " .. latest_author .. (count - 1 == 0 and "" or (" + " .. count - 1))
 					end,
 				},
 			})
@@ -222,7 +230,6 @@ require("lazy").setup({
 			{ "williamboman/mason-lspconfig.nvim" }, -- Optional
 			{ "hrsh7th/nvim-cmp" }, -- Required
 			{ "hrsh7th/cmp-nvim-lsp" }, -- Required
-			{ "L3MON4D3/LuaSnip" }, -- Required
 			{ "onsails/lspkind-nvim" },
 			{ "hrsh7th/cmp-buffer" },
 			{ "hrsh7th/cmp-cmdline" },
@@ -234,7 +241,29 @@ require("lazy").setup({
 		"lukas-reineke/indent-blankline.nvim",
 		main = "ibl",
 		config = function()
-			require("ibl").setup()
+			local highlight = {
+				"RainbowRed",
+				"RainbowYellow",
+				"RainbowBlue",
+				"RainbowOrange",
+				"RainbowGreen",
+				"RainbowViolet",
+				"RainbowCyan",
+
+				"CursorColumn",
+				"Whitespace",
+			}
+			local hooks = require("ibl.hooks")
+			hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
+				vim.api.nvim_set_hl(0, "RainbowRed", { fg = "#E06C75" })
+				vim.api.nvim_set_hl(0, "RainbowYellow", { fg = "#E5C07B" })
+				vim.api.nvim_set_hl(0, "RainbowBlue", { fg = "#61AFEF" })
+				vim.api.nvim_set_hl(0, "RainbowOrange", { fg = "#D19A66" })
+				vim.api.nvim_set_hl(0, "RainbowGreen", { fg = "#98C379" })
+				vim.api.nvim_set_hl(0, "RainbowViolet", { fg = "#C678DD" })
+				vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
+			end)
+			require("ibl").setup({ indent = { highlight = highlight } })
 		end,
 	},
 	{
@@ -459,10 +488,21 @@ require("lazy").setup({
 			{ "<leader>ls", "<cmd>LBSubmit<cr>", desc = "Submit Code" },
 		},
 	},
+	{
+		"L3MON4D3/LuaSnip",
+		version = "v2.*",
+		build = "make install_jsregexp",
+		config = function() 
+		end,
+	},
+	{ 'saadparwaiz1/cmp_luasnip' },
 })
 ---按键映射--------------------------------------------------------------------------------------------------------------------------------------
 --映射jk作为Esc
 vim.api.nvim_set_keymap("i", "jk", "<esc>", { silent = true, noremap = true })
+vim.api.nvim_set_keymap("n", "<C-j>", "<C-w-h>", { silent = true, noremap = true })
+
+vim.api.nvim_set_keymap("n", "<c-p>", "<cmd>!python %<CR>", { silent = true, noremap = true })
 
 -- lspsaga
 vim.api.nvim_set_keymap("n", "gr", "<cmd>lua require('lspsaga.rename').rename()<CR>", { noremap = true, silent = true })
@@ -527,6 +567,7 @@ require("mason-lspconfig").setup({
 		"bashls",
 		"pyright",
 		"vimls",
+		"volar",
 	},
 })
 -- If you want insert `(` after select function or method item
@@ -552,7 +593,7 @@ cmp.setup({
 	--让nvim根据name里面的参数进行补全
 	sources = cmp.config.sources({
 		{ name = "nvim_lsp" },
-		{ name = "vsnip" },
+		{ name = 'luasnip' },
 		{ name = "buffer" },
 		{ name = "path" },
 	}),
