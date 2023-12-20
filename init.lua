@@ -37,6 +37,39 @@ end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
 	{
+		"RRethy/vim-illuminate",
+	},
+	{
+		"L3MON4D3/LuaSnip",
+		build = vim.fn.has("win32") ~= 0 and "make install_jsregexp" or nil,
+		dependencies = {
+			"rafamadriz/friendly-snippets",
+			"benfowler/telescope-luasnip.nvim",
+		},
+		config = function(_, opts)
+			if opts then
+				require("luasnip").config.setup(opts)
+			end
+			vim.tbl_map(function(type)
+				require("luasnip.loaders.from_" .. type).lazy_load()
+			end, { "vscode", "snipmate", "lua" })
+			-- friendly-snippets - enable standardized comments snippets
+			require("luasnip").filetype_extend("typescript", { "tsdoc" })
+			require("luasnip").filetype_extend("javascript", { "jsdoc" })
+			require("luasnip").filetype_extend("lua", { "luadoc" })
+			require("luasnip").filetype_extend("python", { "pydoc", "django", "flask" })
+			require("luasnip").filetype_extend("rust", { "rustdoc" })
+			require("luasnip").filetype_extend("cs", { "csharpdoc" })
+			-- require("luasnip").filetype_extend("java", { "javadoc" })
+			require("luasnip").filetype_extend("c", { "cdoc" })
+			require("luasnip").filetype_extend("cpp", { "cppdoc" })
+			require("luasnip").filetype_extend("php", { "phpdoc" })
+			require("luasnip").filetype_extend("kotlin", { "kdoc" })
+			require("luasnip").filetype_extend("ruby", { "rdoc" })
+			require("luasnip").filetype_extend("sh", { "shelldoc" })
+		end,
+	},
+	{
 		"kevinhwang91/nvim-ufo",
 		requires = "kevinhwang91/promise-async",
 	},
@@ -101,6 +134,7 @@ require("lazy").setup({
 	{
 		"nvim-lualine/lualine.nvim",
 		requires = { "nvim-tree/nvim-web-devicons", opt = true },
+		dependencies = { "arkav/lualine-lsp-progress" },
 		config = function()
 			require("lualine").setup()
 		end,
@@ -141,7 +175,7 @@ require("lazy").setup({
 			},
 		},
 		config = function(_, opts)
-			require("catppuccin").setup(opts)
+			-- require("catppuccin").setup(opts)
 			-- vim.cmd.colorscheme 'catppuccin-mocha'
 		end,
 	},
@@ -240,6 +274,7 @@ require("lazy").setup({
 	{
 		"lukas-reineke/indent-blankline.nvim",
 		main = "ibl",
+		opts = {},
 		config = function()
 			local highlight = {
 				"RainbowRed",
@@ -249,9 +284,6 @@ require("lazy").setup({
 				"RainbowGreen",
 				"RainbowViolet",
 				"RainbowCyan",
-
-				"CursorColumn",
-				"Whitespace",
 			}
 			local hooks = require("ibl.hooks")
 			hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
@@ -263,6 +295,7 @@ require("lazy").setup({
 				vim.api.nvim_set_hl(0, "RainbowViolet", { fg = "#C678DD" })
 				vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
 			end)
+
 			require("ibl").setup({ indent = { highlight = highlight } })
 		end,
 	},
@@ -283,9 +316,8 @@ require("lazy").setup({
 	{
 		"rcarriga/nvim-notify",
 		config = function(_, opts)
-			require("notify")("主其实很在乎，你今天写代码了没有？")
-			-- require("notify")("主其实很在乎，你今天玩原神了没有？")
 			vim.notify = require("notify")
+			require("notify")("主其实很在乎，你今天写代码了没有？")
 			require("notify").setup(vim.tbl_extend("keep", {
 				background_colour = "#000000",
 			}, opts))
@@ -471,31 +503,7 @@ require("lazy").setup({
 			require("symbols-outline").setup()
 		end,
 	},
-	{
-		"Dhanus3133/LeetBuddy.nvim",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"nvim-telescope/telescope.nvim",
-		},
-		config = function()
-			require("leetbuddy").setup({})
-		end,
-		keys = {
-			{ "<leader>lq", "<cmd>LBQuestions<cr>", desc = "List Questions" },
-			{ "<leader>ll", "<cmd>LBQuestion<cr>", desc = "View Question" },
-			{ "<leader>lr", "<cmd>LBReset<cr>", desc = "Reset Code" },
-			{ "<leader>lt", "<cmd>LBTest<cr>", desc = "Run Code" },
-			{ "<leader>ls", "<cmd>LBSubmit<cr>", desc = "Submit Code" },
-		},
-	},
-	{
-		"L3MON4D3/LuaSnip",
-		version = "v2.*",
-		build = "make install_jsregexp",
-		config = function() 
-		end,
-	},
-	{ 'saadparwaiz1/cmp_luasnip' },
+	{ "saadparwaiz1/cmp_luasnip" },
 })
 ---按键映射--------------------------------------------------------------------------------------------------------------------------------------
 --映射jk作为Esc
@@ -506,7 +514,7 @@ vim.api.nvim_set_keymap("n", "<c-p>", "<cmd>!python %<CR>", { silent = true, nor
 
 -- lspsaga
 vim.api.nvim_set_keymap("n", "gr", "<cmd>lua require('lspsaga.rename').rename()<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "ac", "<cmd>Lspsaga code_action<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "bc", "<cmd>Lspsaga code_action<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "dj", "<cmd>Lspsaga hover_doc<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "sl", "<cmd>Lspsaga show_line_diagnostics<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "lf", "<cmd>Lspsaga lsp_finder<CR>", { noremap = true, silent = true })
@@ -563,7 +571,7 @@ vim.keymap.set("n", "<C-o>", "<cmd>TransparentToggle<CR>")
 ---配置区----------------------------------------------------------------------------------------------------------------------------------------
 require("mason-lspconfig").setup({
 	ensure_installed = {
-		"lua_ls",
+		-- "lua_ls",
 		"bashls",
 		"pyright",
 		"vimls",
@@ -593,7 +601,7 @@ cmp.setup({
 	--让nvim根据name里面的参数进行补全
 	sources = cmp.config.sources({
 		{ name = "nvim_lsp" },
-		{ name = 'luasnip' },
+		{ name = "luasnip" },
 		{ name = "buffer" },
 		{ name = "path" },
 	}),
@@ -765,6 +773,50 @@ require("formatter").setup({
 	logging = true,
 	log_level = vim.log.levels.WARN,
 	filetype = {
+		html = {
+			require("formatter.filetypes.html").htmlbeautifier,
+			function()
+				if util.get_current_buffer_file_name() == "special.lua" then
+					return nil
+				end
+				return {
+					exe = "standardjs",
+				}
+			end,
+		},
+		javascript = {
+			require("formatter.filetypes.javascript").standardjs,
+			function()
+				if util.get_current_buffer_file_name() == "special.lua" then
+					return nil
+				end
+				return {
+					exe = "standardjs",
+				}
+			end,
+		},
+		java = {
+			require("formatter.filetypes.java").clangformat,
+			function()
+				if util.get_current_buffer_file_name() == "special.lua" then
+					return nil
+				end
+				return {
+					exe = "clangformat",
+				}
+			end,
+		},
+		python = {
+			require("formatter.filetypes.python").black,
+			function()
+				if util.get_current_buffer_file_name() == "special.lua" then
+					return nil
+				end
+				return {
+					exe = "black",
+				}
+			end,
+		},
 		lua = {
 			require("formatter.filetypes.lua").stylua,
 			function()
@@ -788,4 +840,53 @@ require("formatter").setup({
 			require("formatter.filetypes.any").remove_trailing_whitespace,
 		},
 	},
+})
+local lspsaga = require("lspsaga")
+lspsaga.setup({
+	debug = false,
+	use_saga_diagnostic_sign = true,
+	-- diagnostic sign
+	error_sign = "",
+	warn_sign = "",
+	hint_sign = "",
+	infor_sign = "",
+	diagnostic_header_icon = "   ",
+	-- code action title icon
+	code_action_icon = " ",
+	code_action_prompt = {
+		enable = true,
+		sign = true,
+		sign_priority = 40,
+		virtual_text = true,
+	},
+	finder_definition_icon = "  ",
+	finder_reference_icon = "  ",
+	max_preview_lines = 10,
+	finder_action_keys = {
+		open = "o",
+		vsplit = "s",
+		split = "i",
+		quit = "q",
+		scroll_down = "<C-f>",
+		scroll_up = "<C-b>",
+	},
+	code_action_keys = {
+		quit = "q",
+		exec = "<CR>",
+	},
+	rename_action_keys = {
+		quit = "<C-c>",
+		exec = "<CR>",
+	},
+	definition_preview_icon = "  ",
+	border_style = "single",
+	rename_prompt_prefix = "➤",
+	rename_output_qflist = {
+		enable = false,
+		auto_open_qflist = false,
+	},
+	server_filetype_map = {},
+	diagnostic_prefix_format = "%d. ",
+	diagnostic_message_format = "%m %c",
+	highlight_prefix = false,
 })
